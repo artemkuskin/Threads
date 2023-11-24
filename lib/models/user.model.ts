@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     name: String,
     bio: String,
+    image: String,
     threads: [
         {
             type: mongoose.Schema.Types.ObjectId,

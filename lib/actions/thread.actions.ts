@@ -11,6 +11,13 @@ interface Params {
     path: string
 }
 
+interface ParamsComment {
+    threadId: string
+    commentText: string
+    userId: string
+    path: string
+}
+
 export async function createThread({ text, author, community, path }: Params) {
     connectToDB()
     try {
@@ -95,5 +102,36 @@ export async function fetchThreadById(id: string) {
         return thread
     } catch (error: any) {
         throw new Error(`Error fetch thread: ${error.message}`)
+    }
+}
+
+export async function addCommentToThread({
+    threadId,
+    commentText,
+    userId,
+    path
+}: ParamsComment
+) {
+    connectToDB()
+
+    try {
+        const originalThread = await Thread.findById(threadId)
+
+        const commentThread = new Thread({
+            text: commentText,
+            author: userId,
+            parentId: threadId
+
+        })
+
+        const savedCommentThread = await commentThread.save()
+
+        originalThread.children.push(savedCommentThread._id)
+
+        await originalThread.save()
+
+        revalidatePath(path)
+    } catch (error: any) {
+        throw new Error(`Error add to comment: ${error.message}`)
     }
 }
